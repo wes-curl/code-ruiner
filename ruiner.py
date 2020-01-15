@@ -1,4 +1,4 @@
-import glob, os
+import glob, os, re
 
 def main():
     #this will look through the folder for everything (credit https://stackoverflow.com/questions/3964681/find-all-files-in-a-directory-with-extension-txt-in-python)
@@ -20,23 +20,25 @@ def ruin(file):
         if not_comment(line):
             temp_lines.append(line)
     
-    #on each line,
-    #regex for variables, adding them to a list of found variables
-    
-    #create a table, connecting each found variable to a new, terrible name
-    
-    #for each line, replace the old variables with terrible new ones
+        #on the full text,
+    full_text = ""
+    for line in lines:
+        full_text += line
 
-    #on each line,
-    #regex for functions, adding them to a list of found functions
-    
-    #create a table, connecting each found function to a new, terrible name
-    
-    #for each line, replace the old function with terrible new ones
+    #get a list of all variables
+    variables = get_variables(full_text)
+    #make a table of the old variables to new, terrible variable names
+    variable_dictionary = {X : X for X in variables}
+    for key in variable_dictionary:
+        variable_dictionary[key] = stupid_variable_name()
+
+    #replaces all the instances of the old name with the new, terrible ones
+    for key in variable_dictionary:
+        full_text = re.sub(key, variable_dictionary[key], full_text)
 
     #overwrite the previous file with the new lines
-    open_file = open(file, "w")
-    open_file.writelines(temp_lines)
+    #open_file = open(file, "w")
+    #open_file.writelines(temp_lines)
 
 
 #returns if a given line is not a comment
@@ -48,5 +50,36 @@ def not_comment(line):
             else:
                 return True
     return True
+
+def get_variables(full_text):
+
+    #regex for functions used in the file
+    function = r"[A-Za-z][A-Za-z0-9]*\("
+    #this is all of the functions defined in the file
+    functions_used = re.findall(function, full_text)
+    functions_used = [string[:-1] for string in functions_used]
+
+    #all the python keywords
+    key_words = ["False","class","finally","is","return","None","continue","for","lambda","try","True","def","from",
+    "nonlocal","while","and","del","global","not","with","as","elif","if","or","yield","assert","else",
+    "import","pass","break","except","in","raise"]
+
+    #regex for variables
+    variable = r"[A-Za-z][A-Za-z0-9]*"
+    #this is all of the functions called, defined, AND the variables! oh no!
+    variables = re.findall(variable, full_text)
+    variables = [var for var in variables if var not in functions_used and var not in key_words]
+
+    #cull multiples
+    final_variables = []
+    for variable in variables:
+        if variable not in final_variables:
+            final_variables.append(variable)
+    return final_variables
+
+#picks a random, meaningless name
+def stupid_variable_name():
+    return "TEST"
+    
 
 main()
