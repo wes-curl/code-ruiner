@@ -3,16 +3,16 @@ import glob, os
 def main():
     #this will look through the folder for everything (credit https://stackoverflow.com/questions/3964681/find-all-files-in-a-directory-with-extension-txt-in-python)
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    #print(os.path.dirname(os.path.realpath(__file__)))
     for file in glob.glob("*.py"):
-        print(file)
-    #only keeps files that end in .py and are not called "ruiner.py"
-    #each file is ruined
+        #only keeps files that end in .py and are not called "ruiner.py"
+        if file[-3:] == ".py" and file != "ruiner.py":
+            #each file is ruined
+            ruin(file)
 
 def ruin(file):
     #open the file
-    file = open(file)
-    lines = file.readlines()
+    open_file = open(file, "r")
+    lines = open_file.readlines()
     #for each line, 
     temp_lines = []
     for line in lines:
@@ -35,12 +35,14 @@ def ruin(file):
     #for each line, replace the old function with terrible new ones
 
     #overwrite the previous file with the new lines
+    open_file = open(file, "w")
+    open_file.writelines(temp_lines)
 
 
 #returns if a given line is not a comment
 def not_comment(line):
     for char in line:
-        if char != " " or char != "\t":
+        if char != " " and char != "\t":
             if char == "#":
                 return False
             else:
