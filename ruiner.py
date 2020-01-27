@@ -1,17 +1,17 @@
-import glob, os, re
+import glob, os, re, random
 
 def main():
     #this will look through the folder for everything (credit https://stackoverflow.com/questions/3964681/find-all-files-in-a-directory-with-extension-txt-in-python)
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    for file in glob.glob("*.py"):
+    for fil in glob.glob("*.py"):
         #only keeps files that end in .py and are not called "ruiner.py"
-        if file[-3:] == ".py" and file != "ruiner.py":
+        if fil[-3:] == ".py" and fil != "ruiner.py":
             #each file is ruined
-            ruin(file)
+            ruin(fil)
 
-def ruin(file):
+def ruin(fil):
     #open the file
-    open_file = open(file, "r")
+    open_file = open(fil, "r")
     lines = open_file.readlines()
     #for each line, 
     temp_lines = []
@@ -30,15 +30,21 @@ def ruin(file):
     #make a table of the old variables to new, terrible variable names
     variable_dictionary = {X : X for X in variables}
     for key in variable_dictionary:
-        variable_dictionary[key] = stupid_variable_name()
-
+        variable_dictionary[key] = stupid_variable_name(key)
     #replaces all the instances of the old name with the new, terrible ones
     for key in variable_dictionary:
         full_text = re.sub(key, variable_dictionary[key], full_text)
+    
+    #take the full text and turn it back into lines
+    final_lines = full_text.split("\n")
+    final_lines = [X + "\n" for X in final_lines]
+
 
     #overwrite the previous file with the new lines
-    #open_file = open(file, "w")
-    #open_file.writelines(temp_lines)
+    open_file = open(fil, "w")
+    open_file.writelines(temp_lines)
+    open_file.close
+    
 
 
 #returns if a given line is not a comment
@@ -77,9 +83,77 @@ def get_variables(full_text):
             final_variables.append(variable)
     return final_variables
 
-#picks a random, meaningless name
-def stupid_variable_name():
-    return "TEST"
-    
+#picks a random, meaningless name, based on name inputted.
+def stupid_variable_name(old_name):
+    #if it contains an "_"
+    if "_" in old_name:
+        #split the name by "_"
+        name_parts = old_name.split("_")
+        #shorten each part and add meaningless symbols
+        name_parts = [meaning_less(shorten(X)) for X in name_parts]
+        #reconnect them
+        output = "_"
+        return output.join(name_parts)
+    #if it does not
+    else:        
+        #shorten and add meaningless symbols
+        return meaning_less(shorten(old_name))
+
+
+
+#shortens a string randomly, from the front and back
+def shorten(string):
+    center = len(string) // 2
+    front = random.randint(0, center)
+    back = - (random.randint(0, center) + 1)
+    return string[front:back]
+
+#adds random symbols to the front or end of a string
+def meaning_less(string):
+    bad_stuff = ["_","_","~","$","$","x","X"]
+    mess_amount = random.randint(1,4)
+    mess = ""
+    for i in range(0, mess_amount):
+        mess += random.choice(bad_stuff)
+    options = ["front", "back"]
+    front_or_back = random.choice(options)
+    if front_or_back == "front":
+        return mess + string
+    else:
+        return string + mess
+        
+        
+        
+
+#print("-----------------------SHORTEN TESTS--------------------------------")
+#print(shorten("bagel"))
+#print(shorten("bagel"))
+#print(shorten("bagel"))
+#print(shorten("oatmeal"))
+#print(shorten("oatmeal"))
+#print(shorten("oatmeal"))
+#print(shorten("I_am_too_hungry_to_program"))
+
+#print("-----------------------Meaningless TESTS--------------------------------")
+#print(meaning_less("bagel"))
+#print(meaning_less("bagel"))
+#print(meaning_less("bagel"))
+#print(meaning_less("oatmeal"))
+#print(meaning_less("oatmeal"))
+#print(meaning_less("oatmeal"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 main()
