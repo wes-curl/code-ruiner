@@ -13,6 +13,7 @@ def ruin(fil):
     #open the file
     open_file = open(fil, "r")
     lines = open_file.readlines()
+    open_file.close()
     #for each line, 
     temp_lines = []
     for line in lines:
@@ -35,15 +36,24 @@ def ruin(fil):
     for key in variable_dictionary:
         full_text = re.sub(key, variable_dictionary[key], full_text)
     
+    #get a list of all functions
+    functions = get_functions(full_text)
+    #make a table of the old variables to new, terrible variable names
+    function_dictionary = {X : X for X in functions}
+    for key in function_dictionary:
+        function_dictionary[key] = stupid_function_name(key)
+    #replaces all the instances of the old name with the new, terrible ones
+    for key in function_dictionary:
+        full_text = re.sub(key, function_dictionary[key], full_text)
+
     #take the full text and turn it back into lines
     final_lines = full_text.split("\n")
     final_lines = [X + "\n" for X in final_lines]
 
-
     #overwrite the previous file with the new lines
-    open_file = open(fil, "w")
-    open_file.writelines(temp_lines)
-    open_file.close
+    write_file = open(fil, "w")
+    write_file.writelines(final_lines)
+    write_file.close()
     
 
 
@@ -57,8 +67,39 @@ def not_comment(line):
                 return True
     return True
 
-def get_variables(full_text):
+#takes in a string and returns a list of all the functions definined within the text of that string
+def get_functions(full_text):
+    #regex for custom functions used in the file
+    function = r"def [A-Za-z][A-Za-z0-9_]*\("
+    #this is all of the functions defined in the file
+    functions_used = re.findall(function, full_text)
+    functions_used = [string[4:-1] for string in functions_used] 
+    return functions_used   
 
+
+#takes in a function name an scrambles it to worthlessness
+def stupid_function_name(name):
+    letter_list = [char for char in name]
+    #get rid of half the letters at random
+    random.shuffle(letter_list)
+    letter_list = letter_list[0:len(letter_list) // 2]
+    #insert a number of underscores within the word (letters / 3 -> 0)
+    num_underscores = random.randint(0, len(letter_list) // 3)
+    underscores = []
+    for i in range(0, num_underscores):
+        underscores.append("_")
+    letter_list = letter_list + underscores
+    #move the letters around
+    random.shuffle(letter_list)
+    #if the list creates an invalid function name
+    while(letter_list[0] == "_"):
+        #remove the invalidity
+        letter_list = letter_list[1:]
+    #return it!
+    output = ""
+    return output.join(letter_list)
+
+def get_variables(full_text):
     #regex for functions used in the file
     function = r"[A-Za-z][A-Za-z0-9]*\("
     #this is all of the functions defined in the file
@@ -110,7 +151,7 @@ def shorten(string):
 
 #adds random symbols to the front or end of a string
 def meaning_less(string):
-    bad_stuff = ["_","_","~","$","$","x","X"]
+    bad_stuff = ["_","x","X"]
     mess_amount = random.randint(1,4)
     mess = ""
     for i in range(0, mess_amount):
@@ -122,38 +163,5 @@ def meaning_less(string):
     else:
         return string + mess
         
-        
-        
-
-#print("-----------------------SHORTEN TESTS--------------------------------")
-#print(shorten("bagel"))
-#print(shorten("bagel"))
-#print(shorten("bagel"))
-#print(shorten("oatmeal"))
-#print(shorten("oatmeal"))
-#print(shorten("oatmeal"))
-#print(shorten("I_am_too_hungry_to_program"))
-
-#print("-----------------------Meaningless TESTS--------------------------------")
-#print(meaning_less("bagel"))
-#print(meaning_less("bagel"))
-#print(meaning_less("bagel"))
-#print(meaning_less("oatmeal"))
-#print(meaning_less("oatmeal"))
-#print(meaning_less("oatmeal"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 main()
